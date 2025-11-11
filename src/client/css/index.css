@@ -1,0 +1,219 @@
+body {
+  background-color: #47b0e0;
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#mainPage {
+  background-color: #fff;
+  width: 1200px;
+  height: 800px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.playersNames { padding: 8px 25px; }
+.playersGrades {
+  padding: 8px 25px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.room-info {
+  display: inline-flex;
+  gap: 12px;
+  align-items: center;
+}
+.game-btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  font-size: 1.1rem;
+  background-color: #1a237e;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+#gameDiv {
+  width: 1200px;
+  height: 900px;
+  position: relative;
+  box-sizing: border-box;
+  border-radius: 12px;
+  background: #dac3cd;
+  overflow: hidden;
+}
+.game-table {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  height: 80%;
+  border-radius: 50%/50%;
+  background: #6b3e2d; /* 外框色 */
+  padding: 36px; /* 厚外框 */
+  box-sizing: border-box;
+}
+.game-table .felt {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%/50%;
+  background: #1f8f44; /* 台布 */
+  position: relative;
+}
+
+.board {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 8px;
+  z-index: 5;
+}
+.board-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.board-card {
+  width: 80px;
+  height: auto;
+}
+
+.table-info {
+  position: absolute;
+  min-width: 180px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  text-align: center;
+  font-weight: 600;
+  z-index: 4;
+}
+.table-info .table-info-line1 { font-size: 15px; margin-bottom: 4px; }
+.table-info .table-modename { margin-right: 15px; }
+.table-info .table-stage { margin-left: 15px; }
+.table-info .table-info-line2 { font-size: 15px; }
+.table-info .table-info-chip { width: 20px; height: auto; vertical-align: middle; }
+.table-info .table-info-blind { margin-left: 6px; }
+
+.player-box {
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  padding: 8px;
+  box-sizing: border-box;
+  background: rgba(234, 236, 239, 0.5);
+  color: #000;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-start;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+  z-index: 20;
+}
+.player-box.player-action {
+  background: rgba(255, 250, 205, 0.6);
+}
+.player-box.player-folded {
+  background: rgba(50, 50, 50, 0.6);
+}
+.player-box.player-allin {
+  background: rgba(201, 48, 71, 0.6);
+}
+.player-name { font-weight: 700; font-size: 15px; color: #000;}
+.player-name .buyin-amt { font-size: 15px; font-weight: 500; color: #333; margin-left:4px; }
+.player-name .disconnected-badge { font-size: 15px; font-weight: 500; color: red; margin-left:4px; }
+.player-row { display:flex; align-items:center; justify-content:center; gap:6px; text-align:center; }
+.player-row-top { padding-bottom:4px; }
+.player-out-badge { font-size: 15px; color: black; margin-left:8px; font-weight:600; }
+.player-money { font-size: 15px; display:flex; align-items:center; gap:6px; }
+.player-money .money-icon { width: 30px; height: 30px; }
+.player-money .money-amt { margin-left: 4px; height: 30px; line-height: 30px; font-weight: 700; color: #000; display: inline-block; }
+.player-hand-info { font-size: 15px; color: black; margin-left:8px; font-weight:600; }
+.player-hand { display: flex; gap: -18px; margin-top: 6px; }
+.player-hand .card-img { width: 52px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+.player-hand .card-img:first-child {
+  transform: rotate(-15deg) translateX(-6px);
+  transform-origin: center center;
+  z-index: 3;
+}
+.player-hand .card-img:last-child {
+  transform: rotate(15deg) translateX(6px);
+  transform-origin: center center;
+  z-index: 4;
+  margin-left: -22px;
+}
+
+.player-bet {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 13px;
+  z-index: 25;
+  pointer-events: none;
+}
+.player-bet .chip-img { width: 20px; height: auto; }
+.player-bet .bet-amount { color: #fff; }
+
+.player-blind-badge { position: absolute; z-index: 26; pointer-events: none; }
+.player-blind-badge .blind-img { width: 35px; height: auto; display: block; }
+
+.action-buttons {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 30;
+}
+.action-btn {
+  padding: 12px 24px;
+  font-size: 16px;
+  background-color: #1a237e;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: background-color 0.3s ease;
+}
+
+.action-slider {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center; /* 垂直居中滑块与数值 */
+  gap: 12px;
+  z-index: 30;
+}
+.action-slider input[type="range"] {
+  width: 180px;
+}
+.action-slider .slider-value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-weight: bold;
+}

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Texas Hold'em</title>
+	<link rel="icon" type="image/x-icon" href="./img/favicon.ico">
+	<link rel="stylesheet" href="./css/materialize.min.css">
+	<link rel="stylesheet" href="./css/index.css">
+</head>
+
+<body>
+	<!-- 主页面 -->
+	<div id="mainPage">
+		<div class="login-box">
+			<form>
+				<div class="card-content">
+					<span class="card-title black-text" style="font-size:2rem;">Texas Hold'em - v2.0</span>
+					<p style="font-size:1.6rem;">发起一场游戏, 其他人可以通过房间号加入。</p>
+					<div class="playerdata"></div>
+				</div>
+				<div class="card-action center-align">
+					<a id="hostButton"
+						class="game-btn modal-trigger" href="#hostModal" style="margin-right:30px;">
+						发起 游戏
+					</a>
+					<a id="joinButton"
+						class="game-btn modal-trigger" href="#joinModal">
+						加入 游戏
+					</a>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<!-- 登录游戏弹窗 -->
+	<div id="loginModal" class="modal">
+		<div class="modal-content">
+			<h4>登录游戏</h4>
+			<div id="loginModalContent">
+				<p>请输入你的用户名和密码：</p>
+				<div class="input-field col s12">
+					<label for="name">Username</label>
+					<input type="text" name="name" id="loginName" required="required" />
+				</div>
+				<div class="input-field col s12">
+					<label for="code">密码</label>
+					<input type="text" name="code" id="loginPassword" required="required" />
+				</div>
+				<button onclick=Login() type="submit" class="game-btn">登录</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- 创建游戏弹窗 -->
+	<div id="hostModal" class="modal">
+		<div class="modal-content">
+			<h4>发起游戏</h4>
+			<div id="hostModalContent">
+				<p>输入你的ID, 你将成为房主并获得房间号:</p>
+				<div class="input-field col s12">
+					<label for="name">ID</label>
+					<input type="text" id="hostName" required />
+				</div>
+				<input type="hidden" id="hostMode" value='1'/>
+				<div class="input-field col s12 host-mode-radios">
+					<p>
+						<label>
+							<input name="hostModeRadio" type="radio" checked onclick="document.getElementById('hostMode').value='1'"/>
+							<span>自由模式</span>
+						</label>
+						&nbsp;&nbsp;
+						<label>
+							<input name="hostModeRadio" type="radio" onclick="document.getElementById('hostMode').value='2'"/>
+							<span>锦标赛模式</span>
+						</label>
+					</p>
+				</div>
+				<button onclick=BeginHost() type="submit" class="game-btn">创建 房间</button>
+			</div>
+		</div>
+		<div class="playersNames"></div>
+		<div class="gamebutton"></div>
+		<div class="modal-footer">
+			<a href="#!" class="game-btn modal-close">关闭</a>
+		</div>
+	</div>
+
+	<!-- 加入游戏弹窗 -->
+	<div id="joinModal" class="modal">
+		<div class="modal-content">
+			<h4>加入游戏</h4>
+			<div id="joinModalContent">
+				<p>输入你的ID和房间号, 你将加入游戏:</p>
+				<div class="input-field col s12">
+					<label for="name">ID</label>
+					<input type="text" name="name" id="joinName" required="required" />
+				</div>
+				<div class="input-field col s12">
+					<label for="code">房间号</label>
+					<input type="text" name="code" id="code" required="required" />
+				</div>
+				<button onclick=JoinRoom() type="submit" class="game-btn">加入 游戏</button>
+			</div>
+		</div>
+		<div class="playersNames"></div>
+		<div class="modal-footer">
+			<a href="#!" class="game-btn modal-close">关闭</a>
+		</div>
+	</div>
+
+	<!-- 结束游戏弹窗 -->
+	<div id="gameEndModal" class="modal">
+		<div class="modal-content2">
+			<h4>游戏结束</h4>
+			<div id="gameEndModalContent">
+				<div class="playersGrades"></div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 扑克牌桌 -->
+	<div id="gameDiv"></div>
+
+	<script src="./js/jquery.min.js"></script>
+	<script src="./js/socket.io.min.js"></script>
+	<script src="./js/materialize.min.js"></script>
+	<script src="./main.js"></script>
+</body>
+</html>
