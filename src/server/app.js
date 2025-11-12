@@ -69,6 +69,7 @@ io.on('connection', (socket) => {
         if (game.Players.find((p) => p.Name == data.Username).Disconnected) {
           game.Players.find((p) => p.Name == data.Username).Disconnected = false;
           game.Players.find((p) => p.Name == data.Username).Socket = socket;
+          socket.emit('playerJoined', {});
           game.Rerender();
         }
         else socket.emit('joinRoom', { Error: 4 });

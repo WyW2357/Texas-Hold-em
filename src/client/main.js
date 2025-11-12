@@ -157,10 +157,10 @@ socket.on('gameStart', function () {
 // 处理游戏结束的响应
 socket.on('gameEnd', function (data) {
   if (data.Type == 2) {
-    var resultHtml = '<h4>最终排名：</h4><br />';
+    var resultHtml = '<h4>游戏结束，最终排名：</h4><br />';
     data.Players.sort((a, b) => a.Grade[0] - b.Grade[0]);
     data.Players.forEach(function (p) {
-      resultHtml += '<p>第' + p.Grade[0] + '名：' + p.Name + ' +' + p.Grade[1] + 'pt</p>';
+      resultHtml += '<p>第' + p.Grade[0] + '名：' + p.Name + (p.Grade[1] > 0 ? ' +' : ' ') + p.Grade[1] + 'pt</p>';
     });
     $('.playersGrades').html(resultHtml);
     $('#gameEndModal').modal('open');
@@ -169,7 +169,7 @@ socket.on('gameEnd', function (data) {
     $('#gameDiv').hide();
     socket.emit('login', { Username: localStorage.getItem('username'), Password: localStorage.getItem('password') })
     if (data.Type == 2) $('#gameEndModal').modal('close');
-  }, 5000);
+  }, 8000);
 });
 
 // 处理玩家加入通知
@@ -309,17 +309,18 @@ socket.on('rerender', function (data) {
 
     var $row3 = $('<div class="player-row player-row-bottom"></div>');
     var $hand = $('<div class="player-hand"></div>');
-    if (p.Name === data.MyName)
-      data.MyCards.forEach(function (card) {
-        $hand.append($('<img/>').attr('src', card.ImgPath).addClass('card-img'));
-      });
-    else if (p.Cards.length > 0)
-      p.Cards.forEach(function (card) {
-        $hand.append($('<img/>').attr('src', card.ImgPath).addClass('card-img'));
-      });
-    else
-      for (var i = 0; i < 2; i++)
-        $hand.append($('<img/>').attr('src', './img/cards/back.png').addClass('card-img'));
+    if (!p.Grade || !p.Grade[2])
+      if (p.Name === data.MyName)
+        data.MyCards.forEach(function (card) {
+          $hand.append($('<img/>').attr('src', card.ImgPath).addClass('card-img'));
+        });
+      else if (p.Cards.length > 0)
+        p.Cards.forEach(function (card) {
+          $hand.append($('<img/>').attr('src', card.ImgPath).addClass('card-img'));
+        });
+      else
+        for (var i = 0; i < 2; i++)
+          $hand.append($('<img/>').attr('src', './img/cards/back.png').addClass('card-img'));
     $row3.append($hand);
     $box.append($row1, $row2, $row3);
 

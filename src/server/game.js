@@ -41,7 +41,6 @@ const Player = function (name, id, socket) {
   this.Status = '';      // 玩家当前状态
   this.Blind = '';       // 玩家盲注状态
   this.Position = 0;     // 玩家位置
-  this.DealerNum = 0;    // 玩家做庄次数
   this.Hand = null;      // 玩家当前手牌信息
   this.Bet = 0;          // 玩家当前下注金额
   this.Invest = 0;       // 玩家总下注
@@ -65,6 +64,7 @@ const Game = function (code, host, mode) {
   this.NextBet = 0;               // 下次加注最低值
   this.BlindSet = [1,2];          // 盲注设置
   this.MoneySet = [50,100];       // 初始筹码设置
+  this.PtSet = [0,10];            // 锦标赛积分设置
   this.Dealer = 0;                // 当前庄家玩家
   this.RoundNum = 1;              // 当前回合数
   this.StageNum = 1;              // 当前阶段数
@@ -168,7 +168,7 @@ const Game = function (code, host, mode) {
       if (this.Mode == '1') player.Money = this.MoneySet[0];
       else if (this.Mode == '2') {
         player.Money = this.MoneySet[1];
-        player.Grade = [this.Players.length, 0, false];
+        player.Grade = [this.Players.length, -this.PtSet[1], false];
       }
     });
     this.AssignPosition();
@@ -239,12 +239,16 @@ const Game = function (code, host, mode) {
           outNum++;
         }
       });
+      this.PtSet[0] += outNum * this.PtSet[1];
+      let activePlayerNum = this.Players.filter((p) => !p.Grade[2]).length;
       this.Players.forEach((p) => {
         if (!p.Grade[2]) {
-          p.Grade[0] = this.Players.length - outNum;
-          p.Grade[1] += outNum;
+          p.Grade[0] -= outNum;
+          p.Grade[1] += (this.PtSet[0] - (this.PtSet[0] % activePlayerNum)) / activePlayerNum;
         }
       });
+      this.PtSet[0] = this.PtSet[0] % activePlayerNum;
+      if (activePlayerNum == 1) this.Players.find((p) => !p.Grade[2]).Grade[1] += this.PtSet[0] + this.PtSet[1];
       if (this.Players.some((p) => p.Money == this.MoneySet[1] * this.Players.length)) {
         this.Log('有玩家筹码达到上限，游戏结束');
         this.Players.forEach((p) => {
@@ -254,10 +258,7 @@ const Game = function (code, host, mode) {
         this.EmitToPlayers('gameEnd', {Type : 2, Players: this.Players.map((p) => { return {Name: p.Name, Grade: p.Grade}; })});
         return;
       }
-      do {
-        this.Dealer = (this.Dealer + 1) % this.Players.length;
-        this.Players.find((p) => p.Position === this.Dealer).DealerNum += 1;
-      }
+      do this.Dealer = (this.Dealer + 1) % this.Players.length;
       while (this.Players.find((p) => p.Position === this.Dealer).Money == 0)
     }
     this.LastMovePosition = null;
@@ -309,21 +310,21 @@ const Game = function (code, host, mode) {
           this.EvaluateHands();
           this.StageNum++;
           this.Rerender();
-          await delay(1000);
+          await delay(2000);
         }
         if (this.StageNum == 2) {
           this.Community.push(this.Deck.DealRandomCard());
           this.EvaluateHands();
           this.StageNum++;
           this.Rerender();
-          await delay(1000);
+          await delay(2000);
         }
         if (this.StageNum == 3) {
           this.Community.push(this.Deck.DealRandomCard());
           this.EvaluateHands();
           this.StageNum++;
           this.Rerender();
-          await delay(1000);
+          await delay(2000);
         }
         if (this.StageNum == 4) {
           this.StageNum++;
@@ -401,9 +402,11 @@ const Game = function (code, host, mode) {
         const remainder = winnerPot % winners.length;
         let position = this.Dealer;
         while (remainder > 0) {
-          winners.find((p) => p.Position == position).Money += 1;
-          winners.find((p) => p.Position == position).Gain += 1;
-          remainder--;
+          if (winners.some((p) => p.Position == position)) {
+            winners.find((p) => p.Position == position).Money += 1;
+            winners.find((p) => p.Position == position).Gain += 1;
+            remainder--;
+          }
           position = (position + 1) % this.Players.length;
         }
         canwinPlayers = canwinPlayers.filter((p) => p.Invest > currentBet);
@@ -411,7 +414,7 @@ const Game = function (code, host, mode) {
     }
     this.BetsPool = 0;
     this.Players.forEach((p) => {
-      if (!p.ShowCards && !p.Grade[2]) p.Options = ['Show'];
+      if (!p.ShowCards && p.Cards.length > 0) p.Options = ['Show'];
       else p.Options = [];
       p.Bet = p.Gain - p.Invest;
     });
@@ -495,7 +498,6 @@ const Game = function (code, host, mode) {
     }
     this.Players.forEach((player, index) => {
       player.Position = positions[index];
-      if (index == 0) player.DealerNum = 1;
     });
     this.AssignBlind();
   };
@@ -508,11 +510,7 @@ const Game = function (code, host, mode) {
     while (this.Players.find((p) => p.Position === BigBlind).Money == 0) BigBlind = (BigBlind + 1) % this.Players.length;
     const DealerPlayer = this.Players.find(p => p.Position === this.Dealer);
     if (this.Mode == '2'){
-      let maxDealerNum = 0;
-      this.Players.forEach((p) => {
-        if (p.DealerNum > maxDealerNum) maxDealerNum = p.DealerNum;
-      });
-      if (maxDealerNum % 2 == 0) {
+      if (this.RoundNum % this.Players.length == 1 && this.RoundNum != 1) {
         this.BlindSet[0] *= 2;
         this.BlindSet[1] *= 2;
         this.Log('盲注翻倍！当前盲注：' + this.BlindSet[0] + '/' + this.BlindSet[1]);
@@ -527,18 +525,18 @@ const Game = function (code, host, mode) {
     this.TopBet = this.BlindSet[1];
     this.NextBet = 2 * this.BlindSet[1];
     if (BigBlindPlayer.Money <= this.BlindSet[1]) {
+      BigBlindPlayer.Bet = BigBlindPlayer.Money;
       BigBlindPlayer.Money = 0;
       BigBlindPlayer.Status = 'All-In';
-      BigBlindPlayer.Bet = BigBlindPlayer.Money;
     }
     else {
       BigBlindPlayer.Money -= this.BlindSet[1];
       BigBlindPlayer.Bet = this.BlindSet[1];
     }
     if (SmallBlindPlayer.Money <= this.BlindSet[0]) {
+      SmallBlindPlayer.Bet = SmallBlindPlayer.Money;
       SmallBlindPlayer.Money = 0;
       SmallBlindPlayer.Status = 'All-In';
-      SmallBlindPlayer.Bet = SmallBlindPlayer.Money;
       // 单挑局小盲All-In特殊处理
       if (this.Dealer == BigBlind) {
         BigBlindPlayer.Status = 'Check';
